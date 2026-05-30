@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <title>Написати пост — Mini-Jack</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <nav>
+        <div class="logo-container">
+            <a href="{{ url_for('index') }}" style="margin: 0; padding: 0;">
+                <img src="{{ url_for('static', filename='logo.png') }}" alt="Mini-Jack" class="blog-logo">
+            </a>
+            <span class="site-tagline">Just like mini-jack</span>
+        </div>
+        <div class="nav-links">
+            <a href="{{ url_for('index') }}">← На головну</a>
+            <div class="auth-separator"></div>
+            {% if current_user_id %}
+                <span class="user-greeting">
+                    <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                    {{ current_username }}
+                </span>
+                <a href="{{ url_for('logout') }}" class="btn-logout">Вийти</a>
+            {% else %}
+                <a href="{{ url_for('login') }}">Вхід</a>
+                <a href="{{ url_for('register') }}">Реєстрація</a>
+            {% endif %}
+        </div>
+    </nav>
+
+    <h1>Створення нового запису</h1>
+    
+    {% if not current_user_id %}
+        <div class="guest-warning">
+            <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+            Ти публікуєш пост як гість. Якщо ти очистиш кеш браузера, ти більше не зможеш його видалити!
+        </div>
+    {% endif %}
+
+    <form method="post" enctype="multipart/form-data" action="{{ url_for('create') }}">
+        <div class="form-group">
+            <label for="title">Заголовок статті</label>
+            <input type="text" name="title" placeholder="Введіть назву..." required>
+        </div>
+        
+        <div class="form-group">
+            <label for="content">Текст статті</label>
+            <textarea name="content" rows="10" placeholder="Про що ви думаєте?.." required></textarea>
+        </div>
+
+        <div class="form-group">
+            <label for="image">Додати зображення (необов'язково)</label>
+            <input type="file" name="image" accept="image/*">
+        </div>
+        
+        <button type="submit">Опублікувати на сервісі</button>
+    </form>
+</body>
+</html>
