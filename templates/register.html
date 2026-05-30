@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <title>Реєстрація — Mini-Jack</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <nav>
+        <div class="logo-container">
+            <a href="{{ url_for('index') }}" style="margin: 0; padding: 0;">
+                <img src="{{ url_for('static', filename='logo.png') }}" alt="Mini-Jack" class="blog-logo">
+            </a>
+            <span class="site-tagline">Just like mini-jack</span>
+        </div>
+        <div class="nav-links">
+            <a href="{{ url_for('index') }}">← На головну</a>
+            <a href="{{ url_for('login') }}">Вхід</a>
+        </div>
+    </nav>
+
+    <div class="auth-container">
+        <h1>Створити акаунт</h1>
+        <p>Зареєструйся, щоб твої пости та кошик завжди були з тобою.</p>
+        
+        {% if error %}
+            <div class="error-msg">{{ error }}</div>
+        {% endif %}
+
+        <form method="post" action="{{ url_for('register') }}">
+            <div class="form-group">
+                <label for="username">Логін</label>
+                <input type="text" name="username" placeholder="Придумай ім'я..." required>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Пароль</label>
+                <input type="password" name="password" placeholder="Придумай пароль..." required>
+            </div>
+            
+            <button type="submit" class="auth-btn">Зареєструватися</button>
+        </form>
+    </div>
+</body>
+</html>

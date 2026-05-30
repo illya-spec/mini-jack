@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ post['title'] }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <nav>
+        <div class="logo-container">
+            <a href="{{ url_for('index') }}" style="margin: 0; padding: 0;">
+                <img src="{{ url_for('static', filename='logo.png') }}" alt="Mini-Jack" class="blog-logo">
+            </a>
+            <span class="site-tagline">Just like mini-jack</span>
+        </div>
+        <div class="nav-links">
+            <a href="{{ url_for('index') }}">← На головну</a>
+            <div class="auth-separator"></div>
+            {% if current_user_id %}
+                <span class="user-greeting">
+                    <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                    {{ current_username }}
+                </span>
+                <a href="{{ url_for('logout') }}" class="btn-logout">Вийти</a>
+            {% else %}
+                <a href="{{ url_for('login') }}">Вхід</a>
+                <a href="{{ url_for('register') }}">Реєстрація</a>
+            {% endif %}
+        </div>
+    </nav>
+    
+    <div class="post-author-meta" style="margin-bottom: 10px;">
+        <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+        <span>Автор: {{ post['username'] if post['username'] else 'Гість' }}</span>
+    </div>
+    <h1 style="margin-top: 0;">{{ post['title'] }}</h1>
+    
+    {% if post['image_filename'] %}
+        <div class="post-full-image">
+            <img src="{{ url_for('static', filename='uploads/' + post['image_filename']) }}" alt="Фото поста">
+        </div>
+    {% endif %}
+
+    <div class="post-content">
+        <p>{{ post['content'] }}</p>
+    </div>
+
+    <div class="post-actions" style="margin-top: 30px; margin-bottom: 30px;">
+        <div class="actions-left">
+            <div class="like-container">
+                <form action="{{ url_for('like_post', post_id=post['id']) }}" method="post" class="like-form" data-post-id="{{ post['id'] }}" data-likes-count="{{ post['likes'] }}">
+                    <button type="submit" class="like-button" id="btn-like-{{ post['id'] }}">
+                        <svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.5 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                        Лайк
+                    </button>
+                </form>
+                <span class="like-count">{{ post['likes'] }}</span>
+            </div>
+
+            <button class="comment-toggle-btn" onclick="document.getElementById('modal-overlay-{{ post['id'] }}').style.display = 'flex'">
+                <svg viewBox="0 0 24 24"><path d="M21.99 4c0-1.1-.89-2-1.99-2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14l4 4-.01-18zM18 14H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z"/></svg>
+                Коментарі ({{ post['comments_count'] }})
+            </button>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modal-overlay-{{ post['id'] }}" style="display: none;" onclick="if(event.target===this)this.style.display='none'">
+        <div class="modal-window">
+            <div class="modal-header">
+                <h3>Обговорення поста</h3>
+                <button class="modal-close-btn" onclick="document.getElementById('modal-overlay-{{ post['id'] }}').style.display = 'none'">
+                    <svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+                </button>
+            </div>
+            
+            <div class="modal-comments-list" id="comments-list-{{ post['id'] }}">
+                {% if not post['comments'] %}
+                    <p class="no-comments-text">Тут ще немає жодного коментаря. Будь першим!</p>
+                {% else %}
+                    {% for comment in post['comments'] %}
+                        <div class="comment-item" {% if loop.index > 10 %}style="display: none;" data-hidden="true"{% endif %}>
+                            <div class="comment-meta">
+                                <span style="display: flex; align-items: center; gap: 5px;">
+                                    <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" style="color: #555;">
+                                        <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                                    </svg>
+                                    {{ comment['username'] if comment['username'] else 'Гість' }}
+                                </span>
+                                <span>{{ comment['created_at'] }}</span>
+                            </div>
+                            <p class="comment-text">{{ comment['content'] }}</p>
+                        </div>
+                    {% endfor %}
+
+                    {% if post['comments_count'] > 10 %}
+                        <button type="button" class="btn-load-more-comments" onclick="showAllComments(this, {{ post['id'] }})">Продовжити</button>
+                    {% endif %}
+                {% endif %}
+            </div>
+
+            <div class="modal-footer-form">
+                <form action="{{ url_for('add_comment', post_id=post['id']) }}?redirect=post" method="post">
+                    <div class="comment-form-group">
+                        <input type="text" name="comment_text" class="comment-input" placeholder="Напишіть коментар..." required autocomplete="off">
+                        <button type="submit" class="comment-submit-btn">
+                            <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showAllComments(button, postId) {
+            const list = document.getElementById('comments-list-' + postId);
+            const hiddenComments = list.querySelectorAll('.comment-item[data-hidden="true"]');
+            hiddenComments.forEach(comment => {
+                comment.style.display = 'block';
+            });
+            button.style.display = 'none';
+        }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            const form = document.querySelector(".like-form");
+            if (form) {
+                const postId = form.getAttribute("data-post-id");
+                const serverLikes = parseInt(form.getAttribute("data-likes-count"));
+                const button = form.querySelector(".like-button");
+                
+                if (serverLikes === 0 && localStorage.getItem("liked_post_" + postId)) {
+                    localStorage.removeItem("liked_post_" + postId);
+                }
+
+                if (localStorage.getItem("liked_post_" + postId)) {
+                    button.disabled = true;
+                    button.classList.add("liked");
+                    button.innerHTML = button.innerHTML.replace("Лайк", "Вже залайкано");
+                }
+
+                form.addEventListener("submit", function() {
+                    localStorage.setItem("liked_post_" + postId, "true");
+                });
+            }
+        });
+    </script>
+</body>
+</html>
